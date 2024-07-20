@@ -3,5 +3,5 @@ node_modules/
 python/
 sirJP/
 package.json
-package-lock
+package-lock.json
 server.js
