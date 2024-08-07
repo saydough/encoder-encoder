@@ -1,8 +1,8 @@
 document.getElementById('addWeekBtn').addEventListener('click', addWeek);
 
 let weekCount = 0;
-let existingCourseData = {}; 
-let newCourseData = {}; 
+let existingCourseData = {};
+let newCourseData = {};
 
 function addWeek() {
     weekCount++;
@@ -19,12 +19,12 @@ function addWeek() {
         <input type="text" id="weekTopic${weekCount}" name="weekTopic${weekCount}" required><br>
         ${generateInputFields('Objective', 4, weekCount)}
         ${generateInputFields('Subtopic', 4, weekCount)}
-        ${generateInitialInputFields('Activity', 2, weekCount)}
+        ${generateInitialInputFields('Activity', 1, weekCount)}
         <div id="activityContainer${weekCount}"></div>
-        <button type="button" onclick="addField('Activity', ${weekCount}, 2)">Add Activity</button>
-        ${generateInitialInputFields('Technology Utilized', 2, weekCount)}
+        <button type="button" onclick="addField('Activity', ${weekCount}, 1)">Add Activity</button>
+        ${generateInitialInputFields('Technology Utilized', 1, weekCount)}
         <div id="technologyutilizedContainer${weekCount}"></div>
-        <button type="button" onclick="addField('Technology Utilized', ${weekCount}, 2)">Add Technology Utilized</button>
+        <button type="button" onclick="addField('Technology Utilized', ${weekCount}, 1)">Add Technology Utilized</button>
     `;
 
     weeksContainer.appendChild(weekDiv);
@@ -61,18 +61,43 @@ function addField(label, weekCount, initialCount) {
     const nextIndex = initialCount + inputs.length + 1;
 
     const newField = document.createElement('div');
+    newField.classList.add('fieldContainer');
     newField.innerHTML = `
         <label for="${labelLower}${weekCount}_${nextIndex}">${label} ${nextIndex}:</label>
         <input type="text" id="${labelLower}${weekCount}_${nextIndex}" name="${labelLower}${weekCount}_${nextIndex}" required>
-        <button type="button" onclick="removeField(this)">Delete</button>
     `;
 
     container.appendChild(newField);
+
+    updateDeleteButtons(label, weekCount);
 }
 
-function removeField(button) {
-    const fieldDiv = button.parentNode;
+function updateDeleteButtons(label, weekCount) {
+    const labelLower = label.toLowerCase().replace(/ /g, '');
+    const container = document.getElementById(`${labelLower}Container${weekCount}`);
+    const fields = container.querySelectorAll('.fieldContainer');
+
+    fields.forEach(field => {
+        const deleteButton = field.querySelector('button');
+        if (deleteButton) {
+            deleteButton.remove();
+        }
+    });
+
+    if (fields.length > 0) {
+        const lastField = fields[fields.length - 1];
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => removeField(lastField, labelLower);
+        lastField.appendChild(deleteButton);
+    }
+}
+
+function removeField(fieldDiv, labelLower) {
     fieldDiv.remove();
+    const container = document.getElementById(`${labelLower}Container${weekCount}`);
+    updateDeleteButtons(labelLower.replace('utilized', ' Utilized'), weekCount);
 }
 
 function removeWeek(button) {
@@ -85,7 +110,7 @@ function removeWeek(button) {
 function updateWeekIndexes() {
     const weeksContainer = document.getElementById('weeksContainer');
     const weeks = weeksContainer.querySelectorAll('.week');
-    
+
     weekCount = 0; // Reset week count
     weeks.forEach((weekDiv, index) => {
         weekCount = index + 1; // Update week count
@@ -150,9 +175,9 @@ document.getElementById('courseForm').addEventListener('submit', function(event)
     existingCourseData = { courses: [newCourseData] };
 
     triggerDownload(existingCourseData, filename);
-    
+
     event.target.reset();
-    
+
     document.getElementById('weeksContainer').innerHTML = '';
     weekCount = 0;
 });
