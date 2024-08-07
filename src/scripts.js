@@ -15,6 +15,8 @@ function addWeek() {
     weekDiv.innerHTML = `
         <h3>Week ${weekCount}</h3>
         <button type="button" onclick="removeWeek(this)">Delete Week</button>
+        <label for="weekTopic${weekCount}">Week Topic:</label>
+        <input type="text" id="weekTopic${weekCount}" name="weekTopic${weekCount}" required><br>
         ${generateInputFields('Objective', 4, weekCount)}
         ${generateInputFields('Subtopic', 4, weekCount)}
         ${generateInitialInputFields('Activity', 2, weekCount)}
@@ -128,11 +130,18 @@ document.getElementById('courseForm').addEventListener('submit', function(event)
     };
 
     for (let [key, value] of formData.entries()) {
-        if (key.startsWith('objective') || key.startsWith('subtopic') || key.startsWith('activity') || key.startsWith('technologyutilized')) {
+        if (key.startsWith('weekTopic')) {
+            const weekNum = key.match(/\d+/)[0];
+            const weekKey = `week_${weekNum}`;
+            if (!newCourseData.week[weekKey]) {
+                newCourseData.week[weekKey] = { topic: '', objectives: [], subtopics: [], activities: [], technologies_utilized: [] };
+            }
+            newCourseData.week[weekKey].topic = value;
+        } else if (key.startsWith('objective') || key.startsWith('subtopic') || key.startsWith('activity') || key.startsWith('technologyutilized')) {
             const [label, weekNum] = key.match(/([a-z]+)(\d+)/).slice(1, 3);
             const weekKey = `week_${weekNum}`;
             if (!newCourseData.week[weekKey]) {
-                newCourseData.week[weekKey] = { objectives: [], subtopics: [], activities: [], technologies_utilized: [] };
+                newCourseData.week[weekKey] = { topic: '', objectives: [], subtopics: [], activities: [], technologies_utilized: [] };
             }
             newCourseData.week[weekKey][label === 'objective' ? 'objectives' : label === 'subtopic' ? 'subtopics' : label === 'activity' ? 'activities' : 'technologies_utilized'].push(value);
         }
